@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Québécois — Survival Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141417;
+    --card: #1a1a1f;
+    --border: #2a2a35;
+    --accent: #e8c547;
+    --accent2: #4fc3a1;
+    --accent3: #f0836b;
+    --text: #e8e6e0;
+    --muted: #7a7870;
+    --tag-bg: #22222a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(232,197,71,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  h1 em { color: var(--accent); font-style: italic; }
+  .header-sub {
+    margin-top: 0.7rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    max-width: 420px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: rgba(13,13,15,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 180px;
+    max-width: 320px;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.9rem 0.55rem 2.2rem;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 0.65rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 1rem;
+    pointer-events: none;
+  }
+  .filter-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+  .filter-btn[data-cat="contractions"].active { background: #7b9cf5; border-color: #7b9cf5; color: #000; }
+  .filter-btn[data-cat="conversation"].active { background: var(--accent2); border-color: var(--accent2); color: #000; }
+  .filter-btn[data-cat="insults"].active { background: var(--accent3); border-color: var(--accent3); color: #000; }
+  .filter-btn[data-cat="dictionary"].active { background: #b08de8; border-color: #b08de8; color: #000; }
+
+  /* DAILY SPOTLIGHT */
+  .spotlight {
+    margin: 1.5rem 2rem;
+    padding: 1.4rem 1.6rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+  }
+  .spotlight::after {
+    content: '★';
+    position: absolute;
+    right: 1.2rem;
+    top: 1rem;
+    font-size: 0.8rem;
+    color: var(--accent);
+    opacity: 0.6;
+  }
+  .spotlight-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+  .spotlight-phrase {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .spotlight-meaning {
+    font-size: 0.9rem;
+    color: var(--text);
+    margin: 0.25rem 0;
+  }
+  .spotlight-example {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    font-style: italic;
+  }
+  .spotlight-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.5rem;
+    color: var(--border);
+    font-weight: 500;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 0.2rem;
+  }
+
+  /* COUNT */
+  .count-bar {
+    padding: 0.5rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+
+  .card {
+    background: var(--surface);
+    padding: 1.2rem 1.4rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .card:hover { background: var(--card); }
+  .card.expanded { background: var(--card); }
+
+  .card-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--border);
+    letter-spacing: 0.05em;
+    position: absolute;
+    top: 0.8rem;
+    right: 0.9rem;
+  }
+  .card-cat-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+    margin-right: 0.3rem;
+    vertical-align: middle;
+  }
+  .cat-contractions .card-cat-dot { background: #7b9cf5; }
+  .cat-conversation .card-cat-dot { background: var(--accent2); }
+  .cat-insults .card-cat-dot { background: var(--accent3); }
+  .cat-dictionary .card-cat-dot { background: #b08de8; }
+
+  .phrase {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--accent);
+    line-height: 1.2;
+    padding-right: 1.5rem;
+  }
+  .meaning {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .formal {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .example {
+    display: none;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-style: italic;
+    border-top: 1px solid var(--border);
+    padding-top: 0.6rem;
+    margin-top: 0.2rem;
+    line-height: 1.5;
+  }
+  .card.expanded .example { display: block; }
+  .example strong { color: var(--text); font-style: normal; font-weight: 400; }
+
+  .no-results {
+    grid-column: 1/-1;
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    header { padding: 1.8rem 1.2rem 1.4rem; }
+    .controls { padding: 1rem 1.2rem; }
+    .spotlight { margin: 1rem 1.2rem; }
+    .count-bar { padding: 0.4rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Language Reference</div>
+  <h1>Parle <em>Québécois</em></h1>
+  <p class="header-sub">129 expressions, contractions & words from everyday Québec French. Click any card to see an example.</p>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Search phrase or meaning…" autocomplete="off">
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn active" data-cat="all">All</button>
+    <button class="filter-btn" data-cat="contractions">Contractions</button>
+    <button class="filter-btn" data-cat="conversation">Conversation</button>
+    <button class="filter-btn" data-cat="insults">Swears</button>
+    <button class="filter-btn" data-cat="dictionary">Dictionary</button>
+  </div>
+</div>
+
+<div class="spotlight" id="spotlight">
+  <div class="spotlight-num" id="s-num">01</div>
+  <div>
+    <div class="spotlight-label">Word of the session</div>
+    <div class="spotlight-phrase" id="s-phrase"></div>
+    <div class="spotlight-meaning" id="s-meaning"></div>
+    <div class="spotlight-example" id="s-example"></div>
+  </div>
+</div>
+
+<div class="count-bar" id="count-bar">Showing all 129</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const data = [
+  // CONTRACTIONS
+  { id:1, cat:'contractions', phrase:'Dins', formal:'Dans les', meaning:'In the', example:'Y es dins char — He is in the car.' },
+  { id:2, cat:'contractions', phrase:"J'", formal:'Je', meaning:'I', example:"J'sui donc ben fatigué à matin — I'm really tired this morning." },
+  { id:3, cat:'contractions', phrase:'Kessé', formal:"Qu'est ce que", meaning:'What is', example:'Kessé ça? — What is that?' },
+  { id:4, cat:'contractions', phrase:'Pi / Pis', formal:'Et/Puis', meaning:'And then', example:"On est rentré à la maison pis on a regardé la game de Hockey — We went back home and then watched a Hockey game." },
+  { id:5, cat:'contractions', phrase:"S'a / Su'l / S'es", formal:'Sur la / Sur le / Sur les', meaning:"On the (fem/masc/plural)", example:"Pèse su'l piton bleu — Press on the blue button." },
+  { id:6, cat:'contractions', phrase:'Tsé', formal:'Tu vois', meaning:'You know', example:'Tsé veut dire? — You know what I mean?' },
+  { id:7, cat:'contractions', phrase:'Y', formal:'Il/Ils', meaning:'He / They', example:"Y est po de bonne humeur — He is not in a good mood." },
+  { id:8, cat:'contractions', phrase:"Y'en a", formal:'Il y en a', meaning:'There is', example:"Y'en a pas de problème — There is no problem." },
+
+  // CONVERSATION
+  { id:9, cat:'conversation', phrase:'Attache ta tuque', formal:'Prépare toi', meaning:'Hold on tight / Be prepared', example:"Attache ta tuque, on va avoir de l'ouvrage en masse la semaine prochaine! — Be prepared, we have so much work next week." },
+  { id:10, cat:'conversation', phrase:"Avoir la fly à l'air", formal:'Avoir sa braguette ouverte', meaning:'Your zip is open', example:"J'ai passé toute la journée avec la fly à l'air, quelle honte! — I spent the day with my zip open, what a disgrace!" },
+  { id:11, cat:'conversation', phrase:'Avoir le goût', formal:'Avoir envie de', meaning:'To feel like (doing sth)', example:"J'ai le goût de manger de la viande — I feel like eating some meat." },
+  { id:12, cat:'conversation', phrase:"Ça pas d'allure", formal:"Ce n'est pas possible", meaning:"It doesn't make sense", example:"Ça pas d'allure son histoire! — His story doesn't make sense." },
+  { id:13, cat:'conversation', phrase:"C't écoeurant", formal:"C'était super", meaning:'It was great! Amazing!', example:"C't écoeurant ce film — That movie was great! (But: Arrêtes de m'écoeurer = Stop annoying me)" },
+  { id:14, cat:'conversation', phrase:"Caller l'orignal", formal:'Vomir', meaning:'To throw up (after drinking)', example:'He called the moose last night — he drank way too much.' },
+  { id:15, cat:'conversation', phrase:'Ça m\'a couté une beurrée', formal:'Ça m\'a coûté cher', meaning:'That was really expensive', example:"Je viens de faire l'épicerie, ça m'a coûté une beurrée! — I just went grocery shopping, it was so expensive!" },
+  { id:16, cat:'conversation', phrase:"C'est beau / C'est correct", formal:"C'est bon", meaning:"It's all good / Are you ok?", example:"Es-tu correct? — Are you ok? / C'est correct si j'le fais comme ça? — Is it ok if I do it like that?" },
+  { id:17, cat:'conversation', phrase:"C'est pas si pire", formal:"C'est pas si mal", meaning:"It's not that bad", example:"Comment tu vas? — Pas si pire! — How are you? — Not that bad!" },
+  { id:18, cat:'conversation', phrase:'Cogner des clous', formal:'Piquer du nez', meaning:'To nod off (fighting sleep)', example:"T'as tu assez dormi? Tu cognes des clous à matin — Did you sleep enough? You're nodding off this morning." },
+  { id:19, cat:'conversation', phrase:'Dormir au gaz', formal:'Être lent', meaning:'To act slow / dragging your feet', example:"Arrête de dormir au gaz et mets-toi au travail! — Stop slacking and get moving!" },
+  { id:20, cat:'conversation', phrase:'Y fait frette', formal:'Il fait vraiment froid', meaning:"It's really cold", example:"Y fait trop frette pour aller jouer dehors — It's too cold to go play outside." },
+  { id:21, cat:'conversation', phrase:'De même', formal:'Comme ça', meaning:'Like that / Just like that', example:"Il m'a dit ça... de même — He told me that... just like that." },
+  { id:22, cat:'conversation', phrase:'Tiguidou', formal:'OK', meaning:"That's fine / Alright!", example:"On se voit demain? — Tiguidou! — See you tomorrow? — Sure!" },
+  { id:23, cat:'conversation', phrase:'En titi', formal:'Vraiment', meaning:'Very / Really', example:"Y'es beau en titi — He is gorgeous." },
+  { id:24, cat:'conversation', phrase:'J\'file tout croche', formal:'Je ne me sens pas bien', meaning:"I'm not feeling well", example:"J'file tout croche depuis qu'on a été à ce restaurant — I haven't felt well since that restaurant." },
+  { id:25, cat:'conversation', phrase:"J'ai d'la misère", formal:"C'est difficile pour moi", meaning:'I find it hard to do something', example:"J'ai d'la misère à travailler avec lui — I find it hard to work with him." },
+  { id:26, cat:'conversation', phrase:"J'sui à boutte", formal:'Être au bout du rouleau', meaning:"I can't take it anymore", example:"J'ai trop d'ouvrage depuis le début de la semaine, j'sui à boutte — Too much work this week, I'm done." },
+  { id:27, cat:'conversation', phrase:"J'sui pu capable", formal:"Je n'y arrive plus", meaning:"I can't do this anymore", example:"Same meaning as j'sui à boutte — used when you've hit your limit." },
+  { id:28, cat:'conversation', phrase:"J'sui po capab", formal:"Je n'y arrive pas", meaning:"I cannot do this / I can't stand (sb)", example:"J'suis pas capab de mettre mes souliers maman — I can't put my shoes on, mom. / Elle là, j'sui pas capab — I can't stand her." },
+  { id:29, cat:'conversation', phrase:"J'sui tanné.e", formal:"Je n'en peux plus", meaning:"I'm fed up", example:"J'sui tanné.e de t'entendre chialer toute la journée — I'm fed up listening to you complain all day." },
+  { id:30, cat:'conversation', phrase:"J'va pogner les nerfs", formal:"Je vais m'énerver", meaning:"I'm going to get mad", example:"Si tu continues de me parler ainsi, j'va pogner les nerfs — Keep talking to me like that and I'll lose it." },
+  { id:31, cat:'conversation', phrase:"J'ai mon voyage", formal:"C'est assez / Je n'en reviens pas", meaning:"I'm done! / I can't believe it!", example:"Il y a encore des erreurs sur ma facture! J'ai mon voyage! — More mistakes on my bill, I'm done! / Tu es déjà revenu de Paris? J'ai mon voyage — You're already back from Paris? I can't believe it!" },
+  { id:32, cat:'conversation', phrase:"Pèse su'l piton", formal:'Presser le bouton', meaning:'Press the button', example:"Pèse su'l piton une coup' de fois et ça devrait redémarrer — Press the button a couple times and it should restart." },
+  { id:33, cat:'conversation', phrase:'Coudon', formal:'Eh ben', meaning:'Hey / Well then (surprise)', example:"Coudon t'as tu regardé le film hier soir? — Hey, did you watch the movie last night?" },
+  { id:34, cat:'conversation', phrase:'Jaser / Jasette', formal:'Discuter', meaning:'To chat / A long conversation', example:"Vient jaser avec nous autres! — Come chat with us! / Ma boss a de la jasette — My boss talks a lot." },
+  { id:35, cat:'conversation', phrase:'Pantoute', formal:'Pas du tout', meaning:'Not at all', example:"Je ne te comprends pas pantoute — I don't understand you at all." },
+  { id:36, cat:'conversation', phrase:'Pinotte', formal:'Cacahuète / Ne vaut rien', meaning:'Peanut / Not worth much / Cheap', example:"Cette auto m'a couté des pinottes — This car didn't cost much. / Beurre de pinottes = Peanut butter." },
+  { id:37, cat:'conversation', phrase:'Se faire crosser', formal:'Se faire avoir', meaning:'To get screwed over', example:"Un char à ce prix-là? tu vas te faire crosser — A car at that price? You're getting ripped off for sure." },
+  { id:38, cat:'conversation', phrase:'Tire-toi une bûche', formal:'Prend une chaise', meaning:'Take a seat', example:"Tire-toi une bûche qu'on puisse en jaser — Take a seat so we can talk." },
+  { id:39, cat:'conversation', phrase:"Ça s'peut-tu?", formal:'Est-ce possible?', meaning:'Is that possible? / Really?', example:"Ça s'peut-tu que ta mère arrive demain? — Is it possible your mother is coming tomorrow?" },
+  { id:40, cat:'conversation', phrase:"C'est de valeur", formal:"C'est dommage", meaning:"That's too bad / What a pity", example:"Sa femme est tombée malade pis y a perdu son emploi. C'est donc ben de valeur! — What a pity." },
+  { id:41, cat:'conversation', phrase:'Dépanneur', formal:'Petite épicerie de quartier', meaning:'Convenience store (late hours)', example:"M'en vas au dépanneur chercher une pinte de lait — I'm going to the dep for some milk." },
+  { id:42, cat:'conversation', phrase:'Être dans le trouble', formal:'Avoir des ennuis', meaning:'To be in trouble', example:"Tu vas être dans le trouble si tu continues de niaiser — You'll be in trouble if you keep messing around." },
+  { id:43, cat:'conversation', phrase:"Faque c'est ça", formal:'Alors voilà', meaning:"That's how it is / There you go", example:"Mon chum m'a remis toutes mes choses et on s'est quitté, faque c'est ça — We broke up, that's how it is." },
+  { id:44, cat:'conversation', phrase:'Péter sa coche', formal:"S'énerver", meaning:'To lose your temper', example:"Papa va péter sa coche quand il saura que tu as brisé son cellulaire — Dad will lose it when he finds out about his phone." },
+  { id:45, cat:'conversation', phrase:'Tu me niaises-tu?', formal:'Es-tu sérieux?', meaning:'Are you kidding me?', example:"Sa blonde l'a laissé? Tu me niaises-tu? Y était tellement en amour — His girlfriend left him? Are you serious? He was so in love." },
+  { id:46, cat:'conversation', phrase:'Viens icitte!', formal:'Viens ici', meaning:'Come here!', example:"Icitte = here. Viens icitte! — Come here!" },
+  { id:47, cat:'conversation', phrase:'Check moi ben ça', formal:'Regarde-moi bien', meaning:'Take a good look / Check this out', example:"J'vai checker ça dès que j'arrive à la job — I'll check that as soon as I get to work." },
+  { id:48, cat:'conversation', phrase:'Mets-en!', formal:'Sans aucun doute', meaning:'For sure! / Absolutely!', example:"T'as tu écouté sa nouvelle toune? Elle est vraiment géniale. — Mets-en! — Did you hear her new song? It's awesome. — For sure it is!" },
+  { id:49, cat:'conversation', phrase:'On se calme le pompom', formal:'On se calme', meaning:'Chill out / Calm down', example:"C'est juste une heure que ça va prendre, calme-toi le pom-pom! — It'll only take an hour, chill out!" },
+  { id:50, cat:'conversation', phrase:'Se lâcher lousse', formal:'Se laisser aller sans retenue', meaning:'To let loose / Party hard', example:"J'vais me lâcher lousse à soir — I'm going to party hard tonight." },
+  { id:51, cat:'conversation', phrase:"T'es donc ben fin(e)", formal:'Tu es génial(e)', meaning:"You're so kind / You're really nice!", example:"T'es donc ben fine de lui pardonner! — It's so kind of you to forgive him!" },
+  { id:52, cat:'conversation', phrase:'Partir sur une balloune', formal:"S'enivrer / avoir une lubie", meaning:'To get drunk OR to have a sudden whim', example:'Two meanings depending on context — getting drunk, or suddenly deciding to do something crazy.' },
+  { id:53, cat:'conversation', phrase:'Péter sa balloune', formal:'Ramener à la réalité', meaning:"To burst someone's bubble", example:"Je ne veux pas te péter ta balloune mais il faut des années d'études pour devenir médecin — I don't want to burst your bubble, but…" },
+  { id:54, cat:'conversation', phrase:"C'est le fun", formal:"C'est cool", meaning:"It's awesome / That's cool", example:"After hearing good news: C'est le fun! — That's awesome!" },
+  { id:55, cat:'conversation', phrase:"C'est plate!", formal:"C'est ennuyeux / C'est dommage", meaning:"How boring! / That sucks (for them)", example:"C'est plate icitte! — It's boring here! But: C'est plate pour lui = It sucks for him." },
+  { id:56, cat:'conversation', phrase:"C't'en plein ça", formal:"C'est exactement ça", meaning:"That's exactly it!", example:"Le restaurant ou tu veux aller c'est celui ou on était la dernière fois? — C't'en plein ça! — Exactly right!" },
+  { id:57, cat:'conversation', phrase:'Avoir un kick sur', formal:'Avoir le béguin pour', meaning:'To have a crush on', example:"Y a un kick sur elle — He has a crush on her." },
+  { id:58, cat:'conversation', phrase:'Mon Chum', formal:'Ami / Petit-ami', meaning:'Friend / Boyfriend (context-dependent)', example:"J'vai jouer au Hockey avec mes chums — Playing hockey with my friends. / Mon chum s'es c'lui au chandail vert — My boyfriend has the green shirt." },
+  { id:59, cat:'conversation', phrase:'Donne-moi un bec', formal:'Fais-moi un bisou', meaning:'Give me a kiss', example:'Donne-moi un bec! — Give me a kiss!' },
+  { id:60, cat:'conversation', phrase:"J'lai frenché", formal:"Je lui ai roulé une pelle", meaning:'I gave her/him a French kiss', example:"On s'est vus deux fois et j'lai frenché — We saw each other twice and I French-kissed her." },
+  { id:61, cat:'conversation', phrase:"J'sui en amour", formal:"Je l'aime / Je l'apprécie", meaning:'I love it/them (person or thing)', example:"J'sui en amour avec mon nouveau cellulaire — I love my new phone. / J'sui en amour avec ma boss, elle est trop fine!" },
+  { id:62, cat:'conversation', phrase:'Je veux la marier', formal:"Je veux l'épouser", meaning:'I want to marry her', example:"Je veux marier ma blonde le plus vite possible — I want to marry my girlfriend as soon as possible." },
+  { id:63, cat:'conversation', phrase:'Une date', formal:'Un rendez-vous romantique', meaning:'A (romantic) date', example:"J'ai une date cette fin de semaine — I have a date this weekend." },
+  { id:64, cat:'conversation', phrase:"Ma gang d'amis", formal:"Mon groupe d'amis", meaning:'My group of friends / Guys', example:"On se voit à soir la Gang — See you later guys." },
+  { id:65, cat:'conversation', phrase:'Se faire domper', formal:'Se faire larguer', meaning:'To get dumped', example:"My blonde m'a dompé hier — My girlfriend dumped me yesterday." },
+  { id:66, cat:'conversation', phrase:"J'ai pu une cenne", formal:'Je suis fauché', meaning:"I'm broke", example:"J'ai pu une cenne pour l'amener au restaurant — I can't take her to the restaurant, I'm broke." },
+  { id:67, cat:'conversation', phrase:'Le change', formal:'La monnaie', meaning:'Change (coins)', example:"J'sui allé au dépanneur pis y m'a pas donné mon change — I went to the dep and didn't get my change back." },
+  { id:68, cat:'conversation', phrase:'Magasiner', formal:'Faire du shopping', meaning:'Shopping / Shopping for best price', example:"Je dois magasiner une auto — I should find a car at the best price." },
+  { id:69, cat:'conversation', phrase:'Tu me gosses', formal:"Tu m'énerves", meaning:"You're annoying me", example:"Arrête de faire ce bruit, tu me gosses — Stop making that noise, you're annoying me." },
+  { id:70, cat:'conversation', phrase:'Ya eu un accrochage', formal:"Il y a eu un accident", meaning:'There has been an accident', example:"Désolé du retard, y a eu un accrochage sur l'autoroute — Sorry I'm late, there was an accident on the highway." },
+  { id:71, cat:'conversation', phrase:'Être vite sur ses patins', formal:'Être proactif', meaning:'To be a quick thinker / On the ball', example:"C'est un grand compliment au Québec — It means you're smart and proactive." },
+  { id:72, cat:'conversation', phrase:'On ne lâche pas la patate', formal:'Ne pas abandonner', meaning:"Don't give up!", example:"Aweille les gars on ne lâche pas la patate! — Come on guys, don't give up!" },
+  { id:73, cat:'conversation', phrase:"S'a coche", formal:'Sur la coche', meaning:'Right on the mark / Really good', example:"Ce repas est s'a coche — This meal is delicious." },
+  { id:74, cat:'conversation', phrase:'Tasse-toé', formal:'Recule toi', meaning:'Move out of the way', example:"Tasse-toé je ne vois pas le film — Move, I can't see the movie." },
+  { id:75, cat:'conversation', phrase:'Drette là', formal:'Ici-même / Tout de suite', meaning:'Right here / Right now', example:"C'est drette là que tu dois te décider — You need to decide right now." },
+  { id:76, cat:'conversation', phrase:'Ben voyons donc', formal:'Eh ben', meaning:'For real? / Well, would you look at that', example:"Ça ne fait même pas un mois et il a déjà une promotion! — Ben voyons donc! — He got promoted in under a month! — No way!" },
+
+  // INSULTS
+  { id:77, cat:'insults', phrase:'Calisse / Tabernak / Esti / Criss', formal:'Sacres (objets sacrés)', meaning:'Quebec swear words (from church objects)', example:"All used as swears or to express strong emotion. Toned-down versions: Tabarnouche, Caline. They come from the Catholic Church's objects/rituals." },
+  { id:78, cat:'insults', phrase:'Être en maudit / en criss / en calisse', formal:'Être en colère', meaning:'To be angry / furious', example:"Y'est en maudit — He's really angry." },
+  { id:79, cat:'insults', phrase:'Esti/Osti de niaiseux', formal:'Un idiot', meaning:'You idiot!', example:"Used to call someone a fool. Niaiseux alone also means silly or dumb." },
+  { id:80, cat:'insults', phrase:"Un p'tit criss / p'tit tabernak", formal:'Un petit merdeux', meaning:'A little jerk / brat', example:"Arrête ça, p'tit tabernak — Stop that, you little jerk." },
+  { id:81, cat:'insults', phrase:"Qu'est-ce qu'il est épais", formal:"Qu'est-ce qu'il est bête", meaning:'He is so stupid', example:"Qu'est-ce qu'il est épais celui-là — Wow, is he ever dumb." },
+
+  // DICTIONARY
+  { id:82, cat:'dictionary', phrase:'Achaler', formal:'Contrarier', meaning:'To annoy' },
+  { id:83, cat:'dictionary', phrase:'Adonner', formal:'Bien tomber', meaning:'Good timing / Works out well', example:"Ça adonne bien — That works out well." },
+  { id:84, cat:'dictionary', phrase:'A matin / A soir', formal:'Ce matin / Ce soir', meaning:'This morning / This evening' },
+  { id:85, cat:'dictionary', phrase:"S'astiner", formal:"S'obstiner", meaning:'To persist / be stubborn' },
+  { id:86, cat:'dictionary', phrase:'Aweille', formal:'Allez! / Dépêche-toi!', meaning:'Come on! / Hurry up!', example:"Aweille, on est en retard! — Hurry up, we're late!" },
+  { id:87, cat:'dictionary', phrase:'Banc de neige', formal:'Grosse accumulation de neige', meaning:'Snowbank' },
+  { id:88, cat:'dictionary', phrase:'Barrer', formal:'Verrouiller', meaning:'To lock (a car, door)', example:"As-tu barré ton char? — Did you lock your car?" },
+  { id:89, cat:'dictionary', phrase:'Beigne', formal:'Beignet', meaning:'Donut' },
+  { id:90, cat:'dictionary', phrase:'Blonde', formal:'Petite-amie', meaning:'Girlfriend', example:"Ma blonde — My girlfriend." },
+  { id:91, cat:'dictionary', phrase:'Bobette', formal:'Sous-vêtements', meaning:'Underwear' },
+  { id:92, cat:'dictionary', phrase:'Boutte', formal:'Au bout', meaning:'At the end — also used as "awesome" (à boutte)', example:"C'est le boutte! — It's the best!" },
+  { id:93, cat:'dictionary', phrase:'Brailler', formal:'Pleurer', meaning:'To cry', example:"Arrête de brailler — Stop crying." },
+  { id:94, cat:'dictionary', phrase:'Carte débit', formal:'Carte bancaire', meaning:'Debit card' },
+  { id:95, cat:'dictionary', phrase:'Carter', formal:"Présenter une preuve d'identité", meaning:"To card someone (check ID)", example:"Y m'a carté à la porte — He carded me at the door." },
+  { id:96, cat:'dictionary', phrase:'Clavardage', formal:'Chat (en ligne)', meaning:'Online chatting' },
+  { id:97, cat:'dictionary', phrase:'Capoter', formal:'Prendre plaisir à / Se prendre la tête', meaning:'To go crazy about sth (love it) OR to freak out', example:"Je capote sur ce film — I love this movie. / Capote pas! — Don't freak out!" },
+  { id:98, cat:'dictionary', phrase:'Chaudron', formal:'Casserole', meaning:'Cooking pot' },
+  { id:99, cat:'dictionary', phrase:'Chialer', formal:'Se plaindre', meaning:'To complain / whine', example:"Arrête de chialer — Stop complaining." },
+  { id:100, cat:'dictionary', phrase:'Cramper', formal:'Très amusant', meaning:'Very funny', example:"C'était cramper! — That was hilarious!" },
+  { id:101, cat:'dictionary', phrase:'Char', formal:'Voiture', meaning:'Car', example:"Mon char est brisé — My car is broken." },
+  { id:102, cat:'dictionary', phrase:'Cruiser', formal:'Draguer', meaning:'To hit on / flirt with', example:"Y'a essayé de me cruiser — He tried to hit on me." },
+  { id:103, cat:'dictionary', phrase:'Déjeuner', formal:'Petit-déjeuner', meaning:'Breakfast (≠ French French!)', example:"Je vais déjeuner — I'm having breakfast." },
+  { id:104, cat:'dictionary', phrase:'Diner', formal:'Déjeuner', meaning:'Lunch (≠ French French!)', example:"On dine à midi — We have lunch at noon." },
+  { id:105, cat:'dictionary', phrase:'Souper', formal:'Diner', meaning:'Dinner / Evening meal', example:"On soupe à 6h — We have dinner at 6." },
+  { id:106, cat:'dictionary', phrase:'Enfarger', formal:'Trébucher', meaning:'To stumble / trip on something', example:"Je me suis enfargé dans le tapis — I tripped on the carpet." },
+  { id:107, cat:'dictionary', phrase:'Facture', formal:"L'addition", meaning:'The bill (at a restaurant)', example:"Peux-tu m'apporter la facture? — Can I have the bill?" },
+  { id:108, cat:'dictionary', phrase:'Fly', formal:'Fermeture éclair', meaning:'Zipper', example:"Ta fly est ouverte — Your zipper is open." },
+  { id:109, cat:'dictionary', phrase:"Faire l'épicerie", formal:'Faire les courses', meaning:'Buy groceries', example:"Je vais faire l'épicerie — I'm going grocery shopping." },
+  { id:110, cat:'dictionary', phrase:'Game', formal:'Partie / Match', meaning:'Sports game / match', example:"T'as-tu regardé la game hier? — Did you watch the game last night?" },
+  { id:111, cat:'dictionary', phrase:'Garocher', formal:'Jeter sans faire attention', meaning:'To toss / throw carelessly', example:"Garoches ça dans le fond — Toss it in the back." },
+  { id:112, cat:'dictionary', phrase:'Gazer', formal:"Mettre de l'essence", meaning:'To fill the gas tank', example:"J'ai besoin de gazer mon char — I need to fill up my car." },
+  { id:113, cat:'dictionary', phrase:'Gomme', formal:'Chewing-gum', meaning:'Chewing gum', example:"T'as-tu de la gomme? — Do you have any gum?" },
+  { id:114, cat:'dictionary', phrase:'Icitte', formal:'Ici', meaning:'Here', example:"Viens icitte! — Come here!" },
+  { id:115, cat:'dictionary', phrase:'Jammer', formal:'Bloquer', meaning:'To jam / get stuck', example:"La porte jam — The door is jammed." },
+  { id:116, cat:'dictionary', phrase:'Liqueur', formal:'Boisson gazeuse', meaning:'Soft drink / pop (NOT alcohol!)', example:"Je veux une liqueur — I want a soda. (Don't confuse with French liqueur!)" },
+  { id:117, cat:'dictionary', phrase:'Moé', formal:'Moi', meaning:'Me', example:"C'est pour moé — It's for me." },
+  { id:118, cat:'dictionary', phrase:'Niaiser', formal:"S'amuser de quelqu'un", meaning:'To joke around / mess with someone', example:"Arrête de niaiser — Stop goofing around." },
+  { id:119, cat:'dictionary', phrase:'Plate', formal:'Ennuyeux', meaning:'Boring', example:"C'est plate — It's boring." },
+  { id:120, cat:'dictionary', phrase:'Piler', formal:'Marcher sur', meaning:'To walk on / step on something', example:"Pile pas su'l chat — Don't step on the cat." },
+  { id:121, cat:'dictionary', phrase:'Pogner', formal:'Attraper', meaning:'To catch / get / grab', example:"J'ai pogné un rhume — I caught a cold." },
+  { id:122, cat:'dictionary', phrase:'Scraper', formal:'Briser', meaning:'To break / wreck', example:"T'as scraped mon char! — You wrecked my car!" },
+  { id:123, cat:'dictionary', phrase:"Service à l'auto", formal:'Drive-through', meaning:'Drive-through', example:"On va au service à l'auto? — Want to go through the drive-through?" },
+  { id:124, cat:'dictionary', phrase:'Sloche / Slush', formal:'Neige sale / Boisson sucrée', meaning:'Dirty slush snow OR a slushie drink', example:"Les rues sont pleines de sloche en mars — The streets are full of slush in March." },
+  { id:125, cat:'dictionary', phrase:'Un stationnement', formal:'Une place de parking', meaning:'A parking lot / parking spot', example:"Y a pas de stationnement icitte — There's no parking here." },
+  { id:126, cat:'dictionary', phrase:'Piton', formal:'Bouton', meaning:'Button / knob to press', example:"Pèse su'l piton — Press the button." },
+  { id:127, cat:'dictionary', phrase:'Toé', formal:'Toi', meaning:'You', example:"C'est pour toé — It's for you." },
+  { id:128, cat:'dictionary', phrase:'Tripper', formal:'Aimer beaucoup quelque chose', meaning:'To love something / really be into it', example:"Je trippe sur cette chanson — I'm really into this song." },
+  { id:129, cat:'dictionary', phrase:'Tuque', formal:'Bonnet', meaning:'Winter hat / toque', example:"Mets ta tuque, il fait frette — Put on your toque, it's cold." },
+];
+
+// Spotlight: pick a random entry
+const spotlight = data[Math.floor(Math.random() * data.length)];
+document.getElementById('s-num').textContent = String(spotlight.id).padStart(2,'0');
+document.getElementById('s-phrase').textContent = spotlight.phrase;
+document.getElementById('s-meaning').textContent = spotlight.meaning;
+document.getElementById('s-example').textContent = spotlight.example || '';
+if (!spotlight.example) document.getElementById('s-example').style.display = 'none';
+
+// Render
+const grid = document.getElementById('grid');
+const countBar = document.getElementById('count-bar');
+
+let activeFilter = 'all';
+let searchTerm = '';
+
+function render() {
+  const filtered = data.filter(item => {
+    const matchCat = activeFilter === 'all' || item.cat === activeFilter;
+    const q = searchTerm.toLowerCase();
+    const matchSearch = !q || 
+      item.phrase.toLowerCase().includes(q) || 
+      item.meaning.toLowerCase().includes(q) || 
+      (item.formal || '').toLowerCase().includes(q) ||
+      (item.example || '').toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+
+  countBar.textContent = filtered.length === data.length
+    ? `Showing all ${data.length} entries`
+    : `Showing ${filtered.length} of ${data.length}`;
+
+  grid.innerHTML = '';
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">No results found — try a different search.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const div = document.createElement('div');
+    div.className = `card cat-${item.cat}`;
+    div.innerHTML = `
+      <span class="card-num">#${item.id}</span>
+      <div class="phrase"><span class="card-cat-dot"></span>${item.phrase}</div>
+      <div class="meaning">${item.meaning}</div>
+      ${item.formal ? `<div class="formal">FR: ${item.formal}</div>` : ''}
+      ${item.example ? `<div class="example"><strong>Example:</strong> ${item.example}</div>` : ''}
+    `;
+    if (item.example) {
+      div.addEventListener('click', () => div.classList.toggle('expanded'));
+    }
+    grid.appendChild(div);
+  });
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.cat;
+    render();
+  });
+});
+
+// Search
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
