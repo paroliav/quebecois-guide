@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parle Québécois</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --surface: #ede8df;
+  --card: #ffffff;
+  --border: #d4cdc0;
+  --ink: #1a1612;
+  --muted: #8c8278;
+  --accent: #c8392b;
+  --accent2: #2b6cb0;
+  --accent3: #276749;
+  --gold: #b7791f;
+  --tag-bg: #e8e2d8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Crimson Pro', serif;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(ellipse at 20% 0%, rgba(200,57,43,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(43,108,176,0.05) 0%, transparent 50%);
+}
+
+/* ── QUIZ OVERLAY ─────────────────────────────────────── */
+#quiz-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+
+.quiz-inner {
+  max-width: 540px;
+  width: 100%;
+}
+
+.quiz-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.quiz-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  color: #f5f0e8;
+  line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+
+.quiz-subtitle {
+  font-size: 1rem;
+  color: #8c8278;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.streak-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(183,121,31,0.15);
+  border: 1px solid rgba(183,121,31,0.3);
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  margin-bottom: 2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #b7791f;
+}
+.streak-fire { font-size: 1rem; }
+
+.quiz-card {
+  background: #1f1c18;
+  border: 1px solid #3a3530;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 1.2rem;
+}
+
+.quiz-prompt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #5a5550;
+  margin-bottom: 0.8rem;
+}
+
+.quiz-phrase {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-style: italic;
+  color: #f5f0e8;
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+
+.quiz-category {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: #5a5550;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.quiz-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.quiz-option {
+  background: #1f1c18;
+  border: 1px solid #3a3530;
+  color: #c8c0b5;
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  line-height: 1.3;
+}
+.quiz-option:hover { background: #2a2720; border-color: #5a5550; color: #f5f0e8; }
+.quiz-option.correct { background: rgba(39,103,73,0.25); border-color: #276749; color: #68d391; }
+.quiz-option.wrong { background: rgba(200,57,43,0.2); border-color: var(--accent); color: #fc8181; }
+.quiz-option.reveal { background: rgba(39,103,73,0.1); border-color: #276749; color: #68d391; opacity: 0.6; }
+.quiz-option:disabled { cursor: default; }
+
+.quiz-result {
+  display: none;
+  padding: 1rem 1.2rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+.quiz-result.show { display: block; }
+.quiz-result.win { background: rgba(39,103,73,0.2); border: 1px solid #276749; color: #68d391; }
+.quiz-result.lose { background: rgba(200,57,43,0.15); border: 1px solid var(--accent); color: #fc8181; }
+.quiz-result .example { font-style: italic; color: #8c8278; margin-top: 0.4rem; font-size: 0.88rem; }
+
+.quiz-next-btn {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  padding: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: none;
+  transition: opacity 0.15s;
+  text-transform: uppercase;
+}
+.quiz-next-btn:hover { opacity: 0.85; }
+.quiz-next-btn.show { display: block; }
+
+.skip-link {
+  display: block;
+  text-align: center;
+  margin-top: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #3a3530;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.skip-link:hover { color: #8c8278; }
+
+/* ── MAIN APP ─────────────────────────────────────────── */
+#app { display: none; }
+#app.visible { display: block; }
+
+/* HEADER */
+header {
+  padding: 3rem 2rem 2rem;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: 'QC';
+  position: absolute;
+  right: -0.5rem;
+  top: -1rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 8rem;
+  font-weight: 800;
+  color: rgba(200,57,43,0.04);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.header-left {}
+.header-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+}
+h1 em { color: var(--accent); font-style: italic; font-family: 'Crimson Pro', serif; font-weight: 300; }
+.header-sub {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 1rem;
+  font-style: italic;
+}
+
+.header-right { text-align: right; }
+.streak-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.streak-badge:hover { border-color: var(--gold); }
+.streak-badge-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+.streak-badge-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+
+/* PHRASE OF DAY */
+.potd {
+  margin: 1.5rem 2rem;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 8px;
+  padding: 1.5rem 1.8rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.potd::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(200,57,43,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.potd-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+.potd-phrase {
+  font-family: 'Crimson Pro', serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-style: italic;
+  color: #f5f0e8;
+  line-height: 1.2;
+}
+.potd-meaning {
+  font-size: 0.95rem;
+  color: #c8c0b5;
+  margin-top: 0.2rem;
+}
+.potd-example {
+  font-size: 0.82rem;
+  color: #6a6258;
+  margin-top: 0.3rem;
+  font-style: italic;
+}
+.potd-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 4rem;
+  font-weight: 800;
+  color: rgba(245,240,232,0.05);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* QUIZ AGAIN BTN */
+.quiz-again {
+  margin: 0 2rem 0;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+.quiz-again-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.55rem 1.1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.quiz-again-btn:hover { opacity: 0.85; }
+.score-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.score-display span { color: var(--ink); font-weight: 500; }
+
+/* CONTROLS */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: rgba(245,240,232,0.95);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 160px;
+  max-width: 280px;
+}
+.search-wrap input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  padding: 0.45rem 0.8rem 0.45rem 2rem;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-wrap input::placeholder { color: var(--muted); font-style: italic; }
+.search-wrap::before {
+  content: '⌕';
+  position: absolute;
+  left: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.filter-btns { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.filter-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.38rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--ink); color: var(--ink); }
+.filter-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.filter-btn[data-cat="contractions"].active { background: var(--accent2); border-color: var(--accent2); }
+.filter-btn[data-cat="conversation"].active { background: var(--accent3); border-color: var(--accent3); }
+.filter-btn[data-cat="insults"].active { background: var(--accent); border-color: var(--accent); }
+.filter-btn[data-cat="dictionary"].active { background: var(--gold); border-color: var(--gold); }
+
+.count-bar {
+  padding: 0.5rem 2rem 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  margin-top: 0.8rem;
+}
+
+.card {
+  background: var(--bg);
+  padding: 1.1rem 1.3rem;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { background: var(--card); }
+.card.expanded { background: var(--card); }
+
+.card-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--border);
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+}
+.cat-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.cat-contractions .cat-dot { background: var(--accent2); }
+.cat-conversation .cat-dot { background: var(--accent3); }
+.cat-insults .cat-dot { background: var(--accent); }
+.cat-dictionary .cat-dot { background: var(--gold); }
+
+.phrase {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.2rem;
+  font-style: italic;
+  color: var(--accent);
+  line-height: 1.2;
+  padding-right: 1.8rem;
+}
+.meaning {
+  font-size: 0.88rem;
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 0.2rem;
+}
+.formal {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 0.1rem;
+}
+.example {
+  display: none;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+}
+.card.expanded .example { display: block; }
+.example strong { color: var(--ink); font-style: normal; }
+
+.no-results {
+  grid-column: 1/-1;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+}
+
+/* PROGRESS BAR */
+.progress-wrap {
+  padding: 0.8rem 2rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  max-width: 200px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.progress-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  header { padding: 2rem 1.2rem 1.5rem; grid-template-columns: 1fr; }
+  header::before { display: none; }
+  .header-right { text-align: left; }
+  .potd { margin: 1rem 1.2rem; }
+  .quiz-again { margin: 0.8rem 1.2rem 0; }
+  .controls { padding: 0.8rem 1.2rem; }
+  .count-bar { padding: 0.4rem 1.2rem 0; }
+  .progress-wrap { padding: 0.5rem 1.2rem 0; }
+  .quiz-options { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── QUIZ OVERLAY ── -->
+<div id="quiz-overlay">
+  <div class="quiz-inner">
+    <div class="quiz-eyebrow">Daily Challenge</div>
+    <div class="quiz-title">Parle <span style="color:var(--accent);font-family:'Crimson Pro',serif;font-style:italic;font-weight:300">Québécois?</span></div>
+    <div class="quiz-subtitle">Prove what you know before you browse.</div>
+
+    <div class="streak-display">
+      <span class="streak-fire">🔥</span>
+      <span id="streak-text">0 day streak</span>
+      &nbsp;·&nbsp;
+      <span id="score-text">0 correct all time</span>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-prompt">What does this mean?</div>
+      <div class="quiz-phrase" id="q-phrase">—</div>
+      <div class="quiz-category" id="q-cat">—</div>
+    </div>
+
+    <div class="quiz-options" id="q-options"></div>
+
+    <div class="quiz-result" id="q-result">
+      <div id="q-result-text"></div>
+      <div class="example" id="q-result-example"></div>
+    </div>
+
+    <button class="quiz-next-btn" id="q-next">Next question →</button>
+    <button class="quiz-next-btn" id="q-finish" style="display:none;background:#276749;">Browse the full guide ↓</button>
+
+    <div class="skip-link" id="skip-quiz">skip quiz and browse →</div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+  <header>
+    <div class="header-left">
+      <div class="header-eyebrow">Survival Reference</div>
+      <h1>Parle <em>Québécois</em></h1>
+      <p class="header-sub">129 expressions, contractions & slang from everyday Québec French.</p>
+    </div>
+    <div class="header-right">
+      <div class="streak-badge" onclick="startQuiz()" title="Take the quiz again">
+        <div class="streak-badge-num" id="main-streak">0</div>
+        <div class="streak-badge-label">🔥 Day streak</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--muted);margin-top:0.2rem;text-transform:uppercase;letter-spacing:0.08em">tap to quiz</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="potd">
+    <div>
+      <div class="potd-label">Phrase of the day</div>
+      <div class="potd-phrase" id="potd-phrase">—</div>
+      <div class="potd-meaning" id="potd-meaning">—</div>
+      <div class="potd-example" id="potd-example"></div>
+    </div>
+    <div class="potd-num" id="potd-num">—</div>
+  </div>
+
+  <div class="quiz-again">
+    <button class="quiz-again-btn" onclick="startQuiz()">🎯 Quiz me again</button>
+    <div class="score-display">All-time score: <span id="main-score">0</span> correct</div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <input type="text" id="search" placeholder="Search phrase or meaning…" autocomplete="off">
+    </div>
+    <div class="filter-btns">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="contractions">Contractions</button>
+      <button class="filter-btn" data-cat="conversation">Conversation</button>
+      <button class="filter-btn" data-cat="insults">Swears</button>
+      <button class="filter-btn" data-cat="dictionary">Dictionary</button>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">0 / 129 seen</div>
+  </div>
+  <div class="count-bar" id="count-bar">Showing all 129</div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+const data = [
+  { id:1, cat:'contractions', phrase:'Dins', formal:'Dans les', meaning:'In the', example:'Y es dins char — He is in the car.' },
+  { id:2, cat:'contractions', phrase:"J'", formal:'Je', meaning:'I (contracted)', example:"J'sui donc ben fatigué à matin — I'm really tired this morning." },
+  { id:3, cat:'contractions', phrase:'Kessé', formal:"Qu'est ce que", meaning:'What is / What is that', example:'Kessé ça? — What is that?' },
+  { id:4, cat:'contractions', phrase:'Pi / Pis', formal:'Et/Puis', meaning:'And then', example:"On est rentré à la maison pis on a regardé la game de Hockey — We went home and watched the game." },
+  { id:5, cat:'contractions', phrase:"S'a / Su'l / S'es", formal:'Sur la / Sur le / Sur les', meaning:'On the', example:"Pèse su'l piton bleu — Press on the blue button." },
+  { id:6, cat:'contractions', phrase:'Tsé', formal:'Tu vois', meaning:'You know / You see', example:'Tsé veut dire? — You know what I mean?' },
+  { id:7, cat:'contractions', phrase:'Y', formal:'Il/Ils', meaning:'He / They', example:"Y est po de bonne humeur — He is not in a good mood." },
+  { id:8, cat:'contractions', phrase:"Y'en a", formal:'Il y en a', meaning:'There is / There are', example:"Y'en a pas de problème — There is no problem." },
+  { id:9, cat:'conversation', phrase:'Attache ta tuque', formal:'Prépare toi', meaning:'Hold on tight / Be prepared', example:"Attache ta tuque, on va avoir de l'ouvrage en masse la semaine prochaine! — Be prepared, lots of work ahead!" },
+  { id:10, cat:'conversation', phrase:"Avoir la fly à l'air", formal:'Avoir sa braguette ouverte', meaning:'Your zip is open', example:"J'ai passé toute la journée avec la fly à l'air — I spent the day with my zipper open!" },
+  { id:11, cat:'conversation', phrase:'Avoir le goût', formal:'Avoir envie de', meaning:'To feel like doing something', example:"J'ai le goût de manger de la viande — I feel like eating some meat." },
+  { id:12, cat:'conversation', phrase:"Ça pas d'allure", formal:"Ce n'est pas possible", meaning:"It doesn't make sense", example:"Ça pas d'allure son histoire! — His story doesn't make sense." },
+  { id:13, cat:'conversation', phrase:"C't écoeurant", formal:"C'était super", meaning:'It was great! / Amazing!', example:"C't écoeurant ce film — That movie was great! (also: Arrête de m'écoeurer = Stop annoying me)" },
+  { id:14, cat:'conversation', phrase:"Caller l'orignal", formal:'Vomir', meaning:'To throw up (after drinking)', example:'He called the moose last night — he drank way too much.' },
+  { id:15, cat:'conversation', phrase:"Ça m'a couté une beurrée", formal:"Ça m'a coûté cher", meaning:'That was really expensive', example:"Je viens de faire l'épicerie, ça m'a coûté une beurrée!" },
+  { id:16, cat:'conversation', phrase:"C'est beau / C'est correct", formal:"C'est bon", meaning:"It's all good / Are you ok?", example:"Es-tu correct? — Are you ok?" },
+  { id:17, cat:'conversation', phrase:"C'est pas si pire", formal:"C'est pas si mal", meaning:"It's not that bad", example:"Comment tu vas? — Pas si pire! — Not that bad!" },
+  { id:18, cat:'conversation', phrase:'Cogner des clous', formal:'Piquer du nez', meaning:'To nod off / fighting sleep', example:"Tu cognes des clous à matin — You're nodding off this morning." },
+  { id:19, cat:'conversation', phrase:'Dormir au gaz', formal:'Être lent', meaning:'To act slow / drag your feet', example:"Arrête de dormir au gaz! — Stop slacking!" },
+  { id:20, cat:'conversation', phrase:'Y fait frette', formal:'Il fait vraiment froid', meaning:"It's really cold", example:"Y fait trop frette pour aller jouer dehors — Too cold to play outside." },
+  { id:21, cat:'conversation', phrase:'De même', formal:'Comme ça', meaning:'Like that / Just like that', example:"Il m'a dit ça... de même — He told me that... just like that." },
+  { id:22, cat:'conversation', phrase:'Tiguidou', formal:'OK', meaning:"That's fine / Alright / OK!", example:"On se voit demain? — Tiguidou! — See you tomorrow? — Sure!" },
+  { id:23, cat:'conversation', phrase:'En titi', formal:'Vraiment', meaning:'Very / Really', example:"Y'es beau en titi — He is gorgeous." },
+  { id:24, cat:'conversation', phrase:'J\'file tout croche', formal:'Je ne me sens pas bien', meaning:"I'm not feeling well", example:"J'file tout croche depuis ce restaurant — I haven't felt well since that restaurant." },
+  { id:25, cat:'conversation', phrase:"J'ai d'la misère", formal:"C'est difficile pour moi", meaning:'I find it hard', example:"J'ai d'la misère à travailler avec lui — I find it hard to work with him." },
+  { id:26, cat:'conversation', phrase:"J'sui à boutte", formal:'Être au bout du rouleau', meaning:"I can't take it anymore", example:"J'sui à boutte — I've hit my limit." },
+  { id:27, cat:'conversation', phrase:"J'sui pu capable", formal:"Je n'y arrive plus", meaning:"I can't do this anymore", example:"Same as j'sui à boutte — used when you've had enough." },
+  { id:28, cat:'conversation', phrase:"J'sui po capab", formal:"Je n'y arrive pas", meaning:"I can't do it / I can't stand them", example:"J'suis pas capab de mettre mes souliers — I can't put my shoes on." },
+  { id:29, cat:'conversation', phrase:"J'sui tanné.e", formal:"Je n'en peux plus", meaning:"I'm fed up", example:"J'sui tanné.e de t'entendre chialer — I'm fed up with your complaining." },
+  { id:30, cat:'conversation', phrase:"J'va pogner les nerfs", formal:"Je vais m'énerver", meaning:"I'm going to get mad", example:"Continue et j'va pogner les nerfs — Keep it up and I'll lose it." },
+  { id:31, cat:'conversation', phrase:"J'ai mon voyage", formal:"C'est assez / Je n'en reviens pas", meaning:"I'm done! / I can't believe it!", example:"Encore des erreurs! J'ai mon voyage! — More mistakes! I'm done!" },
+  { id:32, cat:'conversation', phrase:"Pèse su'l piton", formal:'Presser le bouton', meaning:'Press the button', example:"Pèse su'l piton une coup' de fois — Press the button a couple times." },
+  { id:33, cat:'conversation', phrase:'Coudon', formal:'Eh ben', meaning:'Hey / Well then (surprise)', example:"Coudon t'as tu regardé le film hier soir? — Hey, did you watch the movie?" },
+  { id:34, cat:'conversation', phrase:'Jaser / Jasette', formal:'Discuter', meaning:'To chat / A long conversation', example:"Vient jaser avec nous autres! — Come chat with us!" },
+  { id:35, cat:'conversation', phrase:'Pantoute', formal:'Pas du tout', meaning:'Not at all', example:"Je ne te comprends pas pantoute — I don't understand you at all." },
+  { id:36, cat:'conversation', phrase:'Pinotte', formal:'Cacahuète / pas cher', meaning:'Peanut / Cheap / Not worth much', example:"Cette auto m'a couté des pinottes — That car cost almost nothing." },
+  { id:37, cat:'conversation', phrase:'Se faire crosser', formal:'Se faire avoir', meaning:'To get screwed over / ripped off', example:"Un char à ce prix-là? tu vas te faire crosser — A car at that price? You're getting ripped off." },
+  { id:38, cat:'conversation', phrase:'Tire-toi une bûche', formal:'Prend une chaise', meaning:'Take a seat', example:"Tire-toi une bûche qu'on puisse en jaser — Take a seat so we can talk." },
+  { id:39, cat:'conversation', phrase:"Ça s'peut-tu?", formal:'Est-ce possible?', meaning:'Is that possible? / Really?', example:"Ça s'peut-tu que ta mère arrive demain? — Is it possible your mother is coming tomorrow?" },
+  { id:40, cat:'conversation', phrase:"C'est de valeur", formal:"C'est dommage", meaning:"That's too bad / What a pity", example:"Y a perdu son emploi. C'est donc ben de valeur! — He lost his job. What a pity." },
+  { id:41, cat:'conversation', phrase:'Dépanneur', formal:'Petite épicerie', meaning:'Corner store / Convenience store', example:"M'en vas au dépanneur chercher du lait — Going to the dep for milk." },
+  { id:42, cat:'conversation', phrase:'Être dans le trouble', formal:'Avoir des ennuis', meaning:'To be in trouble', example:"Tu vas être dans le trouble — You're going to be in trouble." },
+  { id:43, cat:'conversation', phrase:"Faque c'est ça", formal:'Alors voilà', meaning:"That's how it is / There you go", example:"On s'est quitté, faque c'est ça — We broke up, that's how it is." },
+  { id:44, cat:'conversation', phrase:'Péter sa coche', formal:"S'énerver", meaning:'To lose your temper', example:"Papa va péter sa coche — Dad is going to lose it." },
+  { id:45, cat:'conversation', phrase:'Tu me niaises-tu?', formal:'Es-tu sérieux?', meaning:'Are you kidding me?', example:"Sa blonde l'a laissé? Tu me niaises-tu? — His girlfriend left him? Are you serious?" },
+  { id:46, cat:'conversation', phrase:'Viens icitte!', formal:'Viens ici', meaning:'Come here!', example:"Viens icitte! — Come here!" },
+  { id:47, cat:'conversation', phrase:'Check moi ben ça', formal:'Regarde-moi bien', meaning:'Check this out / Take a look', example:"J'vai checker ça dès que j'arrive à la job — I'll check that as soon as I get to work." },
+  { id:48, cat:'conversation', phrase:'Mets-en!', formal:'Sans aucun doute', meaning:'For sure! / Absolutely!', example:"T'as tu écouté sa nouvelle toune? — Mets-en! — Did you hear her song? — For sure!" },
+  { id:49, cat:'conversation', phrase:'On se calme le pompom', formal:'On se calme', meaning:'Chill out / Calm down', example:"Calme-toi le pom-pom! — Chill out!" },
+  { id:50, cat:'conversation', phrase:'Se lâcher lousse', formal:'Se laisser aller', meaning:'To let loose / Party hard', example:"J'vais me lâcher lousse à soir — I'm going to party hard tonight." },
+  { id:51, cat:'conversation', phrase:"T'es donc ben fin(e)", formal:'Tu es génial(e)', meaning:"You're so kind / You're really nice!", example:"T'es donc ben fine de lui pardonner! — So kind of you to forgive him!" },
+  { id:52, cat:'conversation', phrase:'Partir sur une balloune', formal:"S'enivrer / avoir une lubie", meaning:'To get drunk OR have a sudden whim', example:'Two meanings: getting drunk, or suddenly deciding to do something crazy.' },
+  { id:53, cat:'conversation', phrase:'Péter sa balloune', formal:'Ramener à la réalité', meaning:"To burst someone's bubble", example:"Je ne veux pas te péter ta balloune mais… — I don't want to burst your bubble but…" },
+  { id:54, cat:'conversation', phrase:"C'est le fun", formal:"C'est cool", meaning:"It's awesome / That's cool", example:"C'est le fun! — That's awesome!" },
+  { id:55, cat:'conversation', phrase:"C'est plate!", formal:"C'est ennuyeux / dommage", meaning:"How boring! / That sucks (for them)", example:"C'est plate icitte! — It's boring here!" },
+  { id:56, cat:'conversation', phrase:"C't'en plein ça", formal:"C'est exactement ça", meaning:"That's exactly it!", example:"C't'en plein ça! — That's exactly right!" },
+  { id:57, cat:'conversation', phrase:'Avoir un kick sur', formal:'Avoir le béguin pour', meaning:'To have a crush on', example:"Y a un kick sur elle — He has a crush on her." },
+  { id:58, cat:'conversation', phrase:'Mon Chum', formal:'Ami / Petit-ami', meaning:'Friend or Boyfriend (context)', example:"J'vai jouer au Hockey avec mes chums — Playing hockey with my friends." },
+  { id:59, cat:'conversation', phrase:'Donne-moi un bec', formal:'Fais-moi un bisou', meaning:'Give me a kiss', example:'Donne-moi un bec! — Give me a kiss!' },
+  { id:60, cat:'conversation', phrase:"J'lai frenché", formal:"Je lui ai roulé une pelle", meaning:'I French kissed her/him', example:"On s'est vus deux fois et j'lai frenché." },
+  { id:61, cat:'conversation', phrase:"J'sui en amour", formal:"Je l'aime / Je l'apprécie", meaning:'I love it / I love them', example:"J'sui en amour avec mon nouveau cellulaire — I love my new phone." },
+  { id:62, cat:'conversation', phrase:'Je veux la marier', formal:"Je veux l'épouser", meaning:'I want to marry her', example:"Je veux marier ma blonde le plus vite possible." },
+  { id:63, cat:'conversation', phrase:'Une date', formal:'Un rendez-vous', meaning:'A (romantic) date', example:"J'ai une date cette fin de semaine — I have a date this weekend." },
+  { id:64, cat:'conversation', phrase:"Ma gang d'amis", formal:"Mon groupe d'amis", meaning:'My group of friends / Guys', example:"On se voit à soir la Gang — See you later guys." },
+  { id:65, cat:'conversation', phrase:'Se faire domper', formal:'Se faire larguer', meaning:'To get dumped', example:"My blonde m'a dompé hier — My girlfriend dumped me yesterday." },
+  { id:66, cat:'conversation', phrase:"J'ai pu une cenne", formal:'Je suis fauché', meaning:"I'm broke", example:"J'ai pu une cenne — I'm completely broke." },
+  { id:67, cat:'conversation', phrase:'Le change', formal:'La monnaie', meaning:'Change (coins)', example:"Y m'a pas donné mon change — He didn't give me my change back." },
+  { id:68, cat:'conversation', phrase:'Magasiner', formal:'Faire du shopping', meaning:'Shopping / hunting for best price', example:"Je dois magasiner une auto — I should shop around for a car." },
+  { id:69, cat:'conversation', phrase:'Tu me gosses', formal:"Tu m'énerves", meaning:"You're annoying me", example:"Arrête de faire ce bruit, tu me gosses — Stop that noise, you're annoying me." },
+  { id:70, cat:'conversation', phrase:'Ya eu un accrochage', formal:"Il y a eu un accident", meaning:'There has been an accident', example:"Y a eu un accrochage sur l'autoroute — Accident on the highway." },
+  { id:71, cat:'conversation', phrase:'Être vite sur ses patins', formal:'Être proactif', meaning:'To be a quick thinker / on the ball', example:"C'est un grand compliment — quick thinker, intelligent, proactive." },
+  { id:72, cat:'conversation', phrase:'On ne lâche pas la patate', formal:'Ne pas abandonner', meaning:"Don't give up!", example:"Aweille les gars on ne lâche pas la patate! — Come on guys, don't give up!" },
+  { id:73, cat:'conversation', phrase:"S'a coche", formal:'Sur la coche', meaning:'Right on the mark / Really good', example:"Ce repas est s'a coche — This meal is delicious." },
+  { id:74, cat:'conversation', phrase:'Tasse-toé', formal:'Recule toi', meaning:'Move out of the way', example:"Tasse-toé je ne vois pas le film — Move, I can't see the movie." },
+  { id:75, cat:'conversation', phrase:'Drette là', formal:'Ici-même / Tout de suite', meaning:'Right here / Right now', example:"C'est drette là que tu dois te décider — Decide right now." },
+  { id:76, cat:'conversation', phrase:'Ben voyons donc', formal:'Eh ben', meaning:'For real? / Well I never!', example:"Y a déjà une promotion! — Ben voyons donc! — He already got promoted? — No way!" },
+  { id:77, cat:'insults', phrase:'Calisse / Tabernak / Esti / Criss', formal:'Sacres (objets sacrés)', meaning:'Quebec swear words from church objects', example:"All used as swears. Toned-down: Tabarnouche, Caline. From Catholic Church objects — a form of protest against the church." },
+  { id:78, cat:'insults', phrase:'Être en maudit / en criss', formal:'Être en colère', meaning:'To be angry / furious', example:"Y'est en maudit — He's really angry." },
+  { id:79, cat:'insults', phrase:'Esti/Osti de niaiseux', formal:'Un idiot', meaning:'You idiot! / You fool!', example:"Niaiseux alone also means silly or dumb." },
+  { id:80, cat:'insults', phrase:"Un p'tit criss / p'tit tabernak", formal:'Un petit merdeux', meaning:'A little jerk / brat', example:"Arrête ça, p'tit tabernak — Stop that, you little jerk." },
+  { id:81, cat:'insults', phrase:"Qu'est-ce qu'il est épais", formal:"Qu'est-ce qu'il est bête", meaning:'He is so stupid', example:"Qu'est-ce qu'il est épais celui-là — Wow, is he ever dumb." },
+  { id:82, cat:'dictionary', phrase:'Achaler', formal:'Contrarier', meaning:'To annoy', example:"Arrête de m'achaler — Stop annoying me." },
+  { id:83, cat:'dictionary', phrase:'Adonner', formal:'Bien tomber', meaning:'Good timing / Works out well', example:"Ça adonne bien — That works out perfectly." },
+  { id:84, cat:'dictionary', phrase:'A matin / A soir', formal:'Ce matin / Ce soir', meaning:'This morning / This evening', example:"J'arrive à matin — I arrive this morning." },
+  { id:85, cat:'dictionary', phrase:"S'astiner", formal:"S'obstiner", meaning:'To persist / be stubborn', example:"Arrête de t'astiner — Stop being stubborn." },
+  { id:86, cat:'dictionary', phrase:'Aweille', formal:'Allez! / Dépêche-toi!', meaning:'Come on! / Hurry up!', example:"Aweille, on est en retard! — Hurry up, we're late!" },
+  { id:87, cat:'dictionary', phrase:'Banc de neige', formal:'Grosse accumulation de neige', meaning:'Snowbank', example:"Les bancs de neige bloquent la rue — Snowbanks are blocking the street." },
+  { id:88, cat:'dictionary', phrase:'Barrer', formal:'Verrouiller', meaning:'To lock (a car, door)', example:"As-tu barré ton char? — Did you lock your car?" },
+  { id:89, cat:'dictionary', phrase:'Beigne', formal:'Beignet', meaning:'Donut', example:"Je veux un beigne au chocolat — I want a chocolate donut." },
+  { id:90, cat:'dictionary', phrase:'Blonde', formal:'Petite-amie', meaning:'Girlfriend', example:"Ma blonde est vraiment fine — My girlfriend is really nice." },
+  { id:91, cat:'dictionary', phrase:'Bobette', formal:'Sous-vêtements', meaning:'Underwear', example:"T'as oublié tes bobettes! — You forgot your underwear!" },
+  { id:92, cat:'dictionary', phrase:'Boutte', formal:'Au bout', meaning:'At the end / Also: awesome', example:"C'est le boutte! — It's the best!" },
+  { id:93, cat:'dictionary', phrase:'Brailler', formal:'Pleurer', meaning:'To cry / wail', example:"Arrête de brailler — Stop crying." },
+  { id:94, cat:'dictionary', phrase:'Carte débit', formal:'Carte bancaire', meaning:'Debit card / Bank card', example:"Je paye par carte débit — I'm paying by debit." },
+  { id:95, cat:'dictionary', phrase:'Carter', formal:"Présenter une preuve d'identité", meaning:'To card someone (check ID)', example:"Y m'a carté à la porte — He carded me at the door." },
+  { id:96, cat:'dictionary', phrase:'Clavardage', formal:'Chat (en ligne)', meaning:'Online chatting', example:"Le clavardage en ligne — Online chat." },
+  { id:97, cat:'dictionary', phrase:'Capoter', formal:'Prendre plaisir / Se prendre la tête', meaning:'To love it (go crazy about) OR to freak out', example:"Je capote sur ce film — I love this movie. / Capote pas! — Don't freak out!" },
+  { id:98, cat:'dictionary', phrase:'Chaudron', formal:'Casserole', meaning:'Cooking pot', example:"Passe-moi le chaudron — Pass me the pot." },
+  { id:99, cat:'dictionary', phrase:'Chialer', formal:'Se plaindre', meaning:'To complain / whine', example:"Arrête de chialer — Stop complaining." },
+  { id:100, cat:'dictionary', phrase:'Cramper', formal:'Très amusant', meaning:'Very funny / hilarious', example:"C'était cramper! — That was hilarious!" },
+  { id:101, cat:'dictionary', phrase:'Char', formal:'Voiture', meaning:'Car', example:"Mon char est brisé — My car is broken." },
+  { id:102, cat:'dictionary', phrase:'Cruiser', formal:'Draguer', meaning:'To hit on / flirt with', example:"Y'a essayé de me cruiser — He tried to hit on me." },
+  { id:103, cat:'dictionary', phrase:'Déjeuner', formal:'Petit-déjeuner', meaning:'Breakfast (≠ French French!)', example:"Je vais déjeuner — I'm having breakfast. (NOT lunch!)" },
+  { id:104, cat:'dictionary', phrase:'Diner', formal:'Déjeuner', meaning:'Lunch (≠ French French!)', example:"On dine à midi — We have lunch at noon." },
+  { id:105, cat:'dictionary', phrase:'Souper', formal:'Diner', meaning:'Dinner / Evening meal', example:"On soupe à 6h — We have dinner at 6." },
+  { id:106, cat:'dictionary', phrase:'Enfarger', formal:'Trébucher', meaning:'To stumble / trip on something', example:"Je me suis enfargé dans le tapis — I tripped on the carpet." },
+  { id:107, cat:'dictionary', phrase:'Facture', formal:"L'addition", meaning:'The bill (at restaurant)', example:"Peux-tu m'apporter la facture? — Can I have the bill?" },
+  { id:108, cat:'dictionary', phrase:'Fly', formal:'Fermeture éclair', meaning:'Zipper', example:"Ta fly est ouverte — Your zipper is open." },
+  { id:109, cat:'dictionary', phrase:"Faire l'épicerie", formal:'Faire les courses', meaning:'Buy groceries', example:"Je vais faire l'épicerie — I'm going grocery shopping." },
+  { id:110, cat:'dictionary', phrase:'Game', formal:'Partie / Match', meaning:'Sports game / match', example:"T'as-tu regardé la game hier? — Did you watch the game last night?" },
+  { id:111, cat:'dictionary', phrase:'Garocher', formal:'Jeter sans attention', meaning:'To toss / throw carelessly', example:"Garoches ça dans le fond — Toss it in the back." },
+  { id:112, cat:'dictionary', phrase:'Gazer', formal:"Mettre de l'essence", meaning:'To fill the gas tank', example:"J'ai besoin de gazer mon char — I need to fill up my car." },
+  { id:113, cat:'dictionary', phrase:'Gomme', formal:'Chewing-gum', meaning:'Chewing gum', example:"T'as-tu de la gomme? — Do you have any gum?" },
+  { id:114, cat:'dictionary', phrase:'Icitte', formal:'Ici', meaning:'Here', example:"Viens icitte! — Come here!" },
+  { id:115, cat:'dictionary', phrase:'Jammer', formal:'Bloquer', meaning:'To jam / get stuck', example:"La porte jam — The door is jammed." },
+  { id:116, cat:'dictionary', phrase:'Liqueur', formal:'Boisson gazeuse', meaning:'Soft drink / pop (NOT alcohol!)', example:"Je veux une liqueur — I want a soda. (Not alcohol!)" },
+  { id:117, cat:'dictionary', phrase:'Moé', formal:'Moi', meaning:'Me', example:"C'est pour moé — It's for me." },
+  { id:118, cat:'dictionary', phrase:'Niaiser', formal:"S'amuser de quelqu'un", meaning:'To joke around / mess with someone', example:"Arrête de niaiser — Stop goofing around." },
+  { id:119, cat:'dictionary', phrase:'Plate', formal:'Ennuyeux', meaning:'Boring', example:"C'est plate — It's boring." },
+  { id:120, cat:'dictionary', phrase:'Piler', formal:'Marcher sur', meaning:'To walk on / step on something', example:"Pile pas su'l chat — Don't step on the cat." },
+  { id:121, cat:'dictionary', phrase:'Pogner', formal:'Attraper', meaning:'To catch / get / grab', example:"J'ai pogné un rhume — I caught a cold." },
+  { id:122, cat:'dictionary', phrase:'Scraper', formal:'Briser', meaning:'To break / wreck', example:"T'as scraped mon char! — You wrecked my car!" },
+  { id:123, cat:'dictionary', phrase:"Service à l'auto", formal:'Drive-through', meaning:'Drive-through', example:"On va au service à l'auto? — Want to go through the drive-through?" },
+  { id:124, cat:'dictionary', phrase:'Sloche / Slush', formal:'Neige sale / Boisson sucrée', meaning:'Dirty slush snow OR a slushie drink', example:"Les rues sont pleines de sloche en mars — Streets full of slush in March." },
+  { id:125, cat:'dictionary', phrase:'Un stationnement', formal:'Une place de parking', meaning:'A parking lot / parking spot', example:"Y a pas de stationnement icitte — There's no parking here." },
+  { id:126, cat:'dictionary', phrase:'Piton', formal:'Bouton', meaning:'Button / knob to press', example:"Pèse su'l piton — Press the button." },
+  { id:127, cat:'dictionary', phrase:'Toé', formal:'Toi', meaning:'You', example:"C'est pour toé — It's for you." },
+  { id:128, cat:'dictionary', phrase:'Tripper', formal:'Aimer beaucoup', meaning:'To love something / really be into it', example:"Je trippe sur cette chanson — I'm really into this song." },
+  { id:129, cat:'dictionary', phrase:'Tuque', formal:'Bonnet', meaning:'Winter hat / toque', example:"Mets ta tuque, il fait frette — Put on your toque, it's cold." },
+];
+
+// ── STORAGE ──────────────────────────────────────────────
+function getStorage() {
+  try {
+    const raw = localStorage.getItem('qc_data');
+    return raw ? JSON.parse(raw) : { streak: 0, lastDate: null, totalCorrect: 0, seenIds: [] };
+  } catch(e) { return { streak: 0, lastDate: null, totalCorrect: 0, seenIds: [] }; }
+}
+function saveStorage(obj) {
+  try { localStorage.setItem('qc_data', JSON.stringify(obj)); } catch(e) {}
+}
+
+function getTodayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function updateStreak(correct) {
+  const s = getStorage();
+  const today = getTodayStr();
+  if (s.lastDate !== today) {
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    const yStr = yesterday.toISOString().slice(0,10);
+    s.streak = (s.lastDate === yStr) ? s.streak + 1 : 1;
+    s.lastDate = today;
+  }
+  if (correct) s.totalCorrect = (s.totalCorrect||0) + 1;
+  saveStorage(s);
+  return s;
+}
+
+function markSeen(id) {
+  const s = getStorage();
+  if (!s.seenIds) s.seenIds = [];
+  if (!s.seenIds.includes(id)) s.seenIds.push(id);
+  saveStorage(s);
+}
+
+// ── QUIZ ENGINE ───────────────────────────────────────────
+let quizQueue = [];
+let quizIndex = 0;
+let quizAnswered = false;
+const QUIZ_LENGTH = 5;
+
+function buildQuizQueue() {
+  const shuffled = [...data].sort(() => Math.random() - 0.5);
+  quizQueue = shuffled.slice(0, QUIZ_LENGTH);
+  quizIndex = 0;
+}
+
+function getWrongOptions(correct, count=3) {
+  const pool = data.filter(d => d.meaning !== correct.meaning);
+  const shuffled = pool.sort(() => Math.random()-0.5);
+  return shuffled.slice(0, count).map(d => d.meaning);
+}
+
+function renderQuestion() {
+  quizAnswered = false;
+  const item = quizQueue[quizIndex];
+  document.getElementById('q-phrase').textContent = item.phrase;
+  document.getElementById('q-cat').textContent = item.cat;
+  document.getElementById('q-result').className = 'quiz-result';
+  document.getElementById('q-result-text').textContent = '';
+  document.getElementById('q-result-example').textContent = '';
+
+  const isLast = quizIndex === QUIZ_LENGTH - 1;
+  document.getElementById('q-next').className = 'quiz-next-btn';
+  document.getElementById('q-finish').style.display = 'none';
+
+  const options = [...getWrongOptions(item), item.meaning].sort(() => Math.random()-0.5);
+  const container = document.getElementById('q-options');
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => handleAnswer(btn, opt, item, isLast));
+    container.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, chosen, item, isLast) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const correct = chosen === item.meaning;
+
+  // Update streak/score
+  const s = updateStreak(correct);
+  document.getElementById('streak-text').textContent = `${s.streak} day streak`;
+  document.getElementById('score-text').textContent = `${s.totalCorrect} correct all time`;
+
+  // Style buttons
+  document.querySelectorAll('.quiz-option').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === item.meaning) {
+      b.className = correct && b === btn ? 'quiz-option correct' : 'quiz-option reveal';
+    } else if (b === btn && !correct) {
+      b.className = 'quiz-option wrong';
+    }
+  });
+
+  // Show result
+  const resultEl = document.getElementById('q-result');
+  const resultText = document.getElementById('q-result-text');
+  const resultEx = document.getElementById('q-result-example');
+  if (correct) {
+    resultEl.className = 'quiz-result show win';
+    resultText.textContent = '✓ Correct! ' + item.phrase + ' = ' + item.meaning;
+  } else {
+    resultEl.className = 'quiz-result show lose';
+    resultText.textContent = '✗ Not quite. ' + item.phrase + ' means: ' + item.meaning;
+  }
+  if (item.example) resultEx.textContent = item.example;
+
+  if (isLast) {
+    document.getElementById('q-finish').style.display = 'block';
+    document.getElementById('q-finish').className = 'quiz-next-btn show';
+  } else {
+    document.getElementById('q-next').className = 'quiz-next-btn show';
+  }
+}
+
+document.getElementById('q-next').addEventListener('click', () => {
+  quizIndex++;
+  renderQuestion();
+});
+
+document.getElementById('q-finish').addEventListener('click', () => {
+  showApp();
+});
+
+document.getElementById('skip-quiz').addEventListener('click', showApp);
+
+function startQuiz() {
+  buildQuizQueue();
+  const s = getStorage();
+  document.getElementById('streak-text').textContent = `${s.streak} day streak`;
+  document.getElementById('score-text').textContent = `${s.totalCorrect||0} correct all time`;
+  renderQuestion();
+  document.getElementById('quiz-overlay').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+function showApp() {
+  document.getElementById('quiz-overlay').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  updateMainStats();
+}
+
+function updateMainStats() {
+  const s = getStorage();
+  document.getElementById('main-streak').textContent = s.streak || 0;
+  document.getElementById('main-score').textContent = s.totalCorrect || 0;
+  const seen = (s.seenIds||[]).length;
+  const pct = Math.round((seen/data.length)*100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${seen} / ${data.length} seen`;
+}
+
+// ── PHRASE OF THE DAY ─────────────────────────────────────
+function getPhraseOfDay() {
+  const dayNum = Math.floor(Date.now() / 86400000);
+  return data[dayNum % data.length];
+}
+
+const potd = getPhraseOfDay();
+document.getElementById('potd-phrase').textContent = potd.phrase;
+document.getElementById('potd-meaning').textContent = potd.meaning;
+document.getElementById('potd-example').textContent = potd.example || '';
+document.getElementById('potd-num').textContent = String(potd.id).padStart(2,'0');
+
+// ── REFERENCE GRID ────────────────────────────────────────
+const grid = document.getElementById('grid');
+const countBar = document.getElementById('count-bar');
+let activeFilter = 'all';
+let searchTerm = '';
+
+function render() {
+  const filtered = data.filter(item => {
+    const matchCat = activeFilter === 'all' || item.cat === activeFilter;
+    const q = searchTerm.toLowerCase();
+    const matchSearch = !q ||
+      item.phrase.toLowerCase().includes(q) ||
+      item.meaning.toLowerCase().includes(q) ||
+      (item.formal||'').toLowerCase().includes(q) ||
+      (item.example||'').toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+
+  countBar.textContent = filtered.length === data.length
+    ? `Showing all ${data.length} entries`
+    : `Showing ${filtered.length} of ${data.length}`;
+
+  grid.innerHTML = '';
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="no-results">No results — try a different search.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const div = document.createElement('div');
+    div.className = `card cat-${item.cat}`;
+    div.innerHTML = `
+      <span class="card-num">#${item.id}</span>
+      <div class="phrase"><span class="cat-dot"></span>${item.phrase}</div>
+      <div class="meaning">${item.meaning}</div>
+      ${item.formal ? `<div class="formal">FR: ${item.formal}</div>` : ''}
+      ${item.example ? `<div class="example"><strong>Example:</strong> ${item.example}</div>` : ''}
+    `;
+    if (item.example) {
+      div.addEventListener('click', () => {
+        div.classList.toggle('expanded');
+        markSeen(item.id);
+        updateMainStats();
+      });
+    }
+    grid.appendChild(div);
+  });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.cat;
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
+
+render();
+
+// ── INIT ──────────────────────────────────────────────────
+startQuiz();
+</script>
+</body>
+</html>
